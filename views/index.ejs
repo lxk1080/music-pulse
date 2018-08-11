@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/index.css'/>
+</head>
+<body>
+
+<header class="header">
+    <h1><%= title %></h1>
+</header>
+
+<div class="content">
+    <div class="left">
+        <ul class="list">
+            <% for (let i = 0; i < musicLists.length; i++) { %>
+                <li class="item" title="<%= musicLists[i] %>">
+                    <%= musicLists[i] %>
+                </li>
+            <% } %>
+        </ul>
+    </div>
+    <div class="right"></div>
+</div>
+
+<script src="/javascripts/index.js"></script>
+</body>
+</html>
