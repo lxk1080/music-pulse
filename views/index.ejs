@@ -30,9 +30,25 @@
     </div>
     <div class="right">
         <canvas class="canvas">不支持</canvas>
+
+        <img id="img" src="" alt="" width="800" height="800">
     </div>
 </div>
 
+<script>
+    const image = JSON.parse('<%= image %>'.replace(/(&#34;)/g, '"'));
+
+     let base64String = '';
+     for (let i = 0; i < image.data.length; i++) {
+     base64String += String.fromCharCode(image.data[i]);
+     }
+     const dataUrl = "data:" + image.format + ";base64," + window.btoa(base64String);
+
+     console.log(dataUrl);
+
+     document.querySelector('#img').src = dataUrl;
+
+</script>
 <script src="/javascripts/index.js"></script>
 </body>
 </html>
