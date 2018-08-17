@@ -33,9 +33,10 @@ function random(m, n) {
 }
 
 class Player {
-  constructor({currentSong, volume}) {
+  constructor({currentSong, volume, imageItem}) {
     this.currentSong = currentSong;
     this.volume = volume;
+    this.imageItem = imageItem;
     this.source = null;
     this.ac = null;
     this.gainNode = null;
@@ -91,6 +92,7 @@ class Player {
     // 从后台获得歌曲arraybuffer数据
     const url = `/media/${songName}.mp3`;
     const songData = await this.load(url);
+    const image = await this.getPicture(songName);
 
     // 在songData未获得时，可能切歌了，这里判断
     if (n !== self.count) return;
@@ -109,12 +111,18 @@ class Player {
       // 开始播放
       bufferSource[bufferSource.start ? 'start' : 'noteOn'](0); // 当前时间+0秒后播放
 
-      // 保存当前的source
+      // 显示封面
+      self.showImage(image);
+
+      // 记录当前的source
       self.setSource(bufferSource);
 
     }, function(err) {
       console.log('decode_error:', err);
     });
+
+    // 可有可无
+    return songName;
   }
 
   load(url) {
@@ -127,6 +135,26 @@ class Player {
       };
       xhr.send();
     })
+  }
+
+  getPicture(songName) {
+    return new Promise((resolve) => {
+      xhr.open('GET', `/picture?songName=${songName}`);
+      xhr.responseType = 'json';
+      xhr.onload = function() {
+        resolve(xhr.response);
+      };
+      xhr.send();
+    })
+  }
+
+  showImage(image) {
+    let base64String = '';
+    for (let i = 0; i < image.data.length; i++) {
+      base64String += String.fromCharCode(image.data[i]);
+    }
+    this.imageItem.src = `data:${image.format};base64,${window.btoa(base64String)}`;
+    this.imageItem.style.display = 'block';
   }
 
   visualizer(canvas) {
@@ -284,7 +312,7 @@ class Canvas {
       const y = random(0, this.height);
       const dx = random(1, 4);
       const dy = random(1, 4);
-      const color = `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0, 255)}, ${random(0, 10)/10})`;
+      const color = `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0, 255)}, ${random(0, 10)/20})`;
 
       this.dots.push({x, y, dx, dy, color});
     }
@@ -298,11 +326,13 @@ const musicItems = $(".item");
 const volumeItem = $('.volume')[0];
 const right = $('.right')[0];
 const canvasItem = $('.canvas')[0];
+const backImgItem = $('.back-img')[0];
 const types = $('.type-wrapper li');
 
 const player = new Player({
   currentSong: null,
   volume: volumeItem.value,
+  imageItem: backImgItem,
 });
 
 const canvas = new Canvas({
@@ -340,7 +370,9 @@ for (let i = 0; i < musicItems.length; i++) {
       player.visualizer(canvas);
     }
 
-    player.playSong(this.title);
+    player.playSong(this.title).then((songName) => {
+      console.log('当前歌曲:', songName);
+    });
   });
 }
 
