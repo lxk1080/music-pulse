@@ -312,7 +312,7 @@ class Canvas {
       const y = random(0, this.height);
       const dx = random(1, 4);
       const dy = random(1, 4);
-      const color = `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0, 255)}, ${random(0, 10)/20})`;
+      const color = `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0, 255)}, ${random(0, 10)/10})`;
 
       this.dots.push({x, y, dx, dy, color});
     }
