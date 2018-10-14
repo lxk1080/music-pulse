@@ -201,7 +201,29 @@ class Canvas {
 
   setType(type) {
     this.type = type;
-    type === 'column' ? this.setColumn() : this.createDots();
+
+    switch (type) {
+      case 'column':
+        this.setColumn();
+        break;
+      case 'dot':
+        this.createDots();
+        break;
+    }
+  }
+
+  resize({width, height}) {
+    this.width = this.el.width = width;
+    this.height = this.el.height = height;
+
+    switch (type) {
+      case 'column':
+        this.setColumn();
+        break;
+      case 'dot':
+        this.createDots();
+        break;
+    }
   }
 
   setColumn() {
@@ -212,11 +234,18 @@ class Canvas {
     this.ctx.fillStyle = line;
   }
 
-  resize({width, height}) {
-    this.width = this.el.width = width;
-    this.height = this.el.height = height;
+  createDots() {
+    this.dots = [];
 
-    this.type === 'column' ? this.setColumn() : this.createDots();
+    for (let i = 0; i < this.size; i++) {
+      const x = random(0, this.width);
+      const y = random(0, this.height);
+      const dx = random(1, 4);
+      const dy = random(1, 4);
+      const color = `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0, 255)}, ${random(0, 10)/10})`;
+
+      this.dots.push({x, y, dx, dy, color});
+    }
   }
 
   draw(arr) {
@@ -227,6 +256,9 @@ class Canvas {
 
     } else if (this.type === 'dot') {
       this.drawDot(arr);
+
+    } else if (this.type === 'circle') {
+      this.drawCircle(arr);
 
     }
   }
@@ -273,7 +305,7 @@ class Canvas {
       ctx.fillStyle = radial;
 
       ctx.beginPath();
-      ctx.arc(x, y, r, 0, 360 * Math.PI / 2, false);
+      ctx.arc(x, y, r, 0, 360 * Math.PI / 180, false);
       ctx.closePath();
 
       ctx.fill();
@@ -304,18 +336,50 @@ class Canvas {
     }
   }
 
-  createDots() {
-    this.dots = [];
+  drawCircle(arr) {
+    const ctx = this.ctx;
+    const len = arr.length;
+    const deg = Math.PI/180;
 
-    for (let i = 0; i < this.size; i++) {
-      const x = random(0, this.width);
-      const y = random(0, this.height);
-      const dx = random(1, 4);
-      const dy = random(1, 4);
-      const color = `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0, 255)}, ${random(0, 10)/10})`;
+    const x = this.width / 2;
+    const y = this.height / 2;
+    const baseR = 100;
+    const minR = 200;
 
-      this.dots.push({x, y, dx, dy, color});
+    const angle = 360 / len;
+    const size = 6;
+
+    for (let i = 0; i < len; i++) {
+      const r = minR + baseR * arr[i] / 256;
+      // const color = `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0, 255)}, 1)`;
+
+      // 画线
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.arc(x, y, r, i * angle * deg, i * angle * deg, false);
+      ctx.closePath();
+      // ctx.strokeStyle = color;
+      ctx.strokeStyle = 'yellow';
+      ctx.lineWidth = size;
+      ctx.stroke();
+
+      // 以点的形式展现
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.arc(x, y, r - size, i * angle * deg - 0.01, i * angle * deg + 0.01, false); // 0.01是根据angle的大小计算而来
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
     }
+
+    // 画一个圆盖住不要的线，使中间透明，以放置圆形唱片
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out'; // 全局合成操作, 仅仅显示老图像与新图像没有重叠的部分
+    ctx.arc(x, y, minR - size, 0, 360 * deg, false);
+    ctx.fill();
+    ctx.restore();
   }
 }
 
