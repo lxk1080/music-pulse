@@ -32,6 +32,17 @@ function random(m, n) {
   return Math.floor(Math.random() * (n - m + 1) + m);
 }
 
+function shuffle (arr) {
+  let newArr = arr.slice();
+  for (let i = 0; i < newArr.length; i++) {
+    let j = random(0, i);
+    let tmp = newArr[i];
+    newArr[i] = newArr[j];
+    newArr[j] = tmp;
+  }
+  return newArr;
+}
+
 class Player {
   constructor({currentSong, volume, imageItem}) {
     this.currentSong = currentSong;
