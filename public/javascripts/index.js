@@ -227,7 +227,7 @@ class Canvas {
     this.width = this.el.width = width;
     this.height = this.el.height = height;
 
-    switch (type) {
+    switch (this.type) {
       case 'column':
         this.setColumn();
         break;
